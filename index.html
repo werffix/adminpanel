@@ -1,326 +1,162 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Панель администратора CDCULT</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            color: #4a90e2;
-            text-align: center;
-        }
-        h2 {
-            color: #4a90e2;
-            border-bottom: 1px solid #444;
-            padding-bottom: 5px;
-        }
-        .loading {
-            text-align: center;
-            font-size: 18px;
-            margin: 20px 0;
-        }
-        .error {
-            color: #f44336;
-            background-color: #ffebee;
-            padding: 10px;
-            border-radius: 4px;
-            margin: 10px 0;
-        }
-        .release-card {
-            background-color: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .release-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .release-title {
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.9em;
-            font-weight: bold;
-        }
-        .status-sent { background-color: #4caf50; color: white; }
-        .status-rejected { background-color: #f44336; color: white; }
-        .status-new { background-color: #ff9800; color: black; }
-        .release-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .detail-item {
-            margin-bottom: 5px;
-        }
-        .detail-label {
-            font-weight: bold;
-            color: #bbb;
-            font-size: 0.9em;
-        }
-        .detail-value {
-            word-break: break-word;
-        }
-        .actions {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-        }
-        .action-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .accept-btn { background-color: #4CAF50; }
-        .accept-btn:hover { background-color: #45a049; }
-        .reject-btn { background-color: #f44336; }
-        .reject-btn:hover { background-color: #da190b; }
-        .section {
-            margin-bottom: 40px;
-        }
-        .empty-section {
-            color: #999;
-            font-style: italic;
-            text-align: center;
-            padding: 20px;
-        }
-        /* Стили для спиннера загрузки */
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid #4a90e2;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Админка — Релизы</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 20px; background: #f9f9f9; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab { padding: 10px 20px; cursor: pointer; background: #eee; border-radius: 4px; }
+    .tab.active { background: #4CAF50; color: white; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .release { border: 1px solid #ccc; margin-bottom: 20px; padding: 15px; background: white; border-radius: 6px; }
+    .release h3 { margin-top: 0; }
+    .release p { margin: 5px 0; }
+    .actions { margin-top: 10px; }
+    button { padding: 6px 12px; margin-right: 8px; border: none; border-radius: 4px; cursor: pointer; }
+    .approve { background: #4CAF50; color: white; }
+    .reject { background: #f44336; color: white; }
+    textarea { width: 100%; height: 60px; margin-top: 5px; }
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
-    <h1>Панель администратора CDCULT</h1>
-    <div id="loading" class="loading">
-        <div class="spinner"></div>
-        <p>Загрузка данных...</p>
-    </div>
-    <div id="error-container" class="error" style="display: none;"></div>
-    <div id="releases-container" style="display: none;">
 
-        <div class="section">
-            <h2>Новые релизы (<span id="new-count">0</span>)</h2>
-            <div id="new-releases-list">
-                <div class="empty-section" id="new-empty">Нет новых релизов.</div>
-            </div>
-        </div>
+<h1>Админ-панель релизов</h1>
 
-        <div class="section">
-            <h2>Отправленные (<span id="sent-count">0</span>)</h2>
-            <div id="sent-releases-list">
-                <div class="empty-section" id="sent-empty">Нет отправленных релизов.</div>
-            </div>
-        </div>
+<div class="tabs">
+  <div class="tab active" data-tab="moderation">В модерации</div>
+  <div class="tab" data-tab="approved">Одобрено</div>
+  <div class="tab" data-tab="rejected">Отклонено</div>
+</div>
 
-        <div class="section">
-            <h2>Отклонённые (<span id="rejected-count">0</span>)</h2>
-            <div id="rejected-releases-list">
-                <div class="empty-section" id="rejected-empty">Нет отклонённых релизов.</div>
-            </div>
-        </div>
+<div id="moderation" class="panel active"></div>
+<div id="approved" class="panel"></div>
+<div id="rejected" class="panel"></div>
 
-    </div>
+<script>
+  // ЗАМЕНИ НА СВОЙ URL ИЗ APPS SCRIPT
+  const API_URL = "https://script.google.com/macros/s/AKfycbz16PUVr3qJzZr_QYglFQ8A1rlghCsUelro-byahQNC66MTL4k1TZEPNk-72TGhApc/exec";
 
-    <script>
-        // --- ВАЖНО: ЗАМЕНИТЕ ЭТОТ URL НА ВАШ РЕАЛЬНЫЙ URL РАЗВЁРНУТОГО GAS ВЕБ-ПРИЛОЖЕНИЯ ---
-        const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwNeQd2jsgu7jc9_ak5DOde1JfyaMG1C8xLNSZSZN6EbWQ4G7trSmDXWqutSzDvp258/exec';
-        // --------------------------------------------------------------------------------------------
+  let allReleases = [];
 
-        let releasesData = {};
+  // Загрузка данных
+  async function loadReleases() {
+    try {
+      const res = await fetch(API_URL);
+      const json = await res.json();
+      if (!json.success) throw new Error("Ошибка загрузки");
+      allReleases = json.releases;
+      renderTabs();
+    } catch (e) {
+      alert("Ошибка: " + e.message);
+    }
+  }
 
-        async function loadData() {
-            try {
-                document.getElementById('loading').style.display = 'block';
-                document.getElementById('releases-container').style.display = 'none';
-                document.getElementById('error-container').style.display = 'none';
+  // Отправка решения
+  async function updateRelease(id, status, comment = "") {
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status, comment })
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "Неизвестная ошибка");
+      alert("✅ Обновлено!");
+      loadReleases(); // перезагрузить
+    } catch (e) {
+      alert("❌ Ошибка: " + e.message);
+    }
+  }
 
-                const response = await fetch(`${API_BASE_URL}?action=getReleases`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
+  // Рендер вкладок
+  function renderTabs() {
+    const mod = document.getElementById("moderation");
+    const appr = document.getElementById("approved");
+    const rej = document.getElementById("rejected");
 
-                if (data.error) {
-                    throw new Error(data.error);
-                }
+    mod.innerHTML = "";
+    appr.innerHTML = "";
+    rej.innerHTML = "";
 
-                releasesData = data;
-                displayReleases(data);
-            } catch (error) {
-                console.error('Ошибка загрузки:', error);
-                showError(error.message);
-            }
-        }
+    allReleases.forEach(rel => {
+      const div = document.createElement("div");
+      div.className = "release";
 
-        function displayReleases(data) {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('releases-container').style.display = 'block';
+      // ID — добавь в таблицу колонку "ID" с уникальным номером (например =ROW())
+      const id = rel["ID"] || rel["Название релиза"]; // fallback
 
-            // Обновляем счётчики
-            document.getElementById('new-count').textContent = data.new.length;
-            document.getElementById('sent-count').textContent = data.sent.length;
-            document.getElementById('rejected-count').textContent = data.rejected.length;
+      const fields = [
+        "Основные артист(-ы)", "Тип релиза", "Название релиза", "Названия треков",
+        "Подзаголовок", "Вы переносите или перезаливаете релиз", "UPC (если есть)",
+        "Дата оригинального релиза (если есть)", "Жанр релиза", "Дата выхода",
+        "ФИО автора(-ов) текста", "ФИО автора(-ов) инструментала",
+        "Ненормативная лексика", "Ссылка на архив",
+        "Карточка/профиль артиста в Spotify (Есть/Нет)", "Ссылка на Spotify (если есть)",
+        "Карточка/профиль артиста в Apple Music (Есть/Нет)", "Ссылка на Apple Music (если есть)",
+        "Telegram", "Доп. Комментарий"
+      ];
 
-            ['new', 'sent', 'rejected'].forEach(category => {
-                const listEl = document.getElementById(`${category}-releases-list`);
-                listEl.innerHTML = ''; // Очищаем
-                document.getElementById(`${category}-empty`).style.display = data[category].length > 0 ? 'none' : 'block';
+      let html = `<h3>${rel["Название релиза"]} — ${rel["Основные артист(-ы)"]}</h3>`;
+      fields.forEach(f => {
+        if (rel[f]) html += `<p><strong>${f}:</strong> ${rel[f]}</p>`;
+      });
 
-                data[category].forEach(rel => {
-                    const card = createReleaseCard(rel, category);
-                    listEl.appendChild(card);
-                });
-            });
-        }
+      const status = (rel["Статус"] || "").toLowerCase().trim();
+      if (status === "green") {
+        html += `<p><strong>Статус:</strong> ✅ Одобрен</p>`;
+        if (rel["Комментарий"]) html += `<p><strong>Комментарий:</strong> ${rel["Комментарий"]}</p>`;
+        appr.appendChild(div);
+      } else if (status === "red") {
+        html += `<p><strong>Статус:</strong> ❌ Отклонён</p>`;
+        if (rel["Комментарий"]) html += `<p><strong>Комментарий:</strong> ${rel["Комментарий"]}</p>`;
+        rej.appendChild(div);
+      } else {
+        // В модерации
+        const commentField = document.createElement("textarea");
+        commentField.placeholder = "Комментарий (при отклонении)";
 
-        function createReleaseCard(release, category) {
-            const card = document.createElement('div');
-            card.className = 'release-card';
+        const actions = `
+          <div class="actions">
+            <button class="approve" onclick="updateRelease('${id}', 'green')">✅ Принять</button>
+            <button class="reject" onclick="rejectWithComment('${id}', this.previousElementSibling.value)">❌ Отклонить</button>
+          </div>
+        `;
+        div.innerHTML = html + actions;
+        div.appendChild(commentField);
+        mod.appendChild(div);
+      }
+    });
 
-            const header = document.createElement('div');
-            header.className = 'release-header';
+    if (mod.innerHTML === "") mod.innerHTML = "<p>Нет релизов в модерации</p>";
+    if (appr.innerHTML === "") appr.innerHTML = "<p>Нет одобренных</p>";
+    if (rej.innerHTML === "") rej.innerHTML = "<p>Нет отклонённых</p>";
+  }
 
-            const title = document.createElement('div');
-            title.className = 'release-title';
-            const artist = release['Основные артист(-ы)'] || release['Main Artist(s)'] || 'N/A';
-            const titleName = release['Название релиза'] || release['Release Title'] || 'N/A';
-            title.textContent = `${artist} - ${titleName}`;
-            header.appendChild(title);
+  // Глобальная функция для кнопок (из-за onclick)
+  window.updateRelease = updateRelease;
+  window.rejectWithComment = (id, comment) => {
+    if (!comment.trim()) {
+      if (!confirm("Вы точно хотите отклонить без комментария?")) return;
+    }
+    updateRelease(id, "red", comment);
+  };
 
-            const statusBadge = document.createElement('div');
-            statusBadge.className = 'status-badge';
-            if (category === 'sent') {
-                statusBadge.classList.add('status-sent');
-                statusBadge.textContent = 'Отправлен';
-            } else if (category === 'rejected') {
-                statusBadge.classList.add('status-rejected');
-                statusBadge.textContent = 'Отклонён';
-            } else {
-                statusBadge.classList.add('status-new');
-                statusBadge.textContent = 'Новый';
-            }
-            header.appendChild(statusBadge);
+  // Переключение вкладок
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById(tab.dataset.tab).classList.add("active");
+    });
+  });
 
-            card.appendChild(header);
+  // Запуск
+  loadReleases();
+</script>
 
-            const details = document.createElement('div');
-            details.className = 'release-details';
-            Object.keys(release).forEach(key => {
-                if (key === '__rowIndex__') return;
-                const detailItem = document.createElement('div');
-                detailItem.className = 'detail-item';
-                const label = document.createElement('div');
-                label.className = 'detail-label';
-                label.textContent = key;
-                const value = document.createElement('div');
-                value.className = 'detail-value';
-                value.textContent = release[key];
-                detailItem.appendChild(label);
-                detailItem.appendChild(value);
-                details.appendChild(detailItem);
-            });
-            card.appendChild(details);
-
-            if (category === 'new') {
-                const actions = document.createElement('div');
-                actions.className = 'actions';
-
-                const acceptBtn = document.createElement('button');
-                acceptBtn.textContent = 'Принять (green)';
-                acceptBtn.className = 'action-btn accept-btn';
-                acceptBtn.onclick = () => changeStatus(release.__rowIndex__, 'green');
-
-                const rejectBtn = document.createElement('button');
-                rejectBtn.textContent = 'Отклонить (red)';
-                rejectBtn.className = 'action-btn reject-btn';
-                rejectBtn.onclick = () => changeStatus(release.__rowIndex__, 'red');
-
-                actions.appendChild(acceptBtn);
-                actions.appendChild(rejectBtn);
-                card.appendChild(actions);
-            }
-
-            return card;
-        }
-
-        async function changeStatus(rowIndex, newStatus) {
-            if (!confirm(`Вы уверены, что хотите изменить статус строки ${rowIndex} на "${newStatus}"?`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch(API_BASE_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'updateStatus',
-                        rowIndex: rowIndex,
-                        newStatus: newStatus
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const result = await response.json();
-
-                if (result.success) {
-                    // Успешно обновлено, перезагружаем данные
-                    loadData();
-                    // alert(result.message); // Опционально
-                } else {
-                    throw new Error(result.error || 'Неизвестная ошибка при обновлении статуса');
-                }
-            } catch (error) {
-                console.error('Ошибка обновления статуса:', error);
-                alert(`Ошибка: ${error.message}`);
-            }
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('error-container');
-            errorDiv.textContent = `Произошла ошибка: ${message}`;
-            errorDiv.style.display = 'block';
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('releases-container').style.display = 'none';
-        }
-
-        window.onload = loadData;
-    </script>
 </body>
 </html>

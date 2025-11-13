@@ -3,13 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Модерация релизов</title>
+    <title>CDCULT Moderation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
             --status-approved: #28a745;
             --status-rejected: #dc3545;
             --status-pending: #ffc107;
+            --bg-main: #0f0f14;
+            --bg-card: #1a1a22;
+            --text-primary: #f8f9fa;
+            --text-secondary: #adb5bd;
+            --border-color: #343a40;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+        .navbar-status {
+            background-color: #15151c;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            color: #6d7bff !important;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .card-header {
+            background-color: rgba(255,255,255,0.03);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
         }
 
         .status-badge {
@@ -18,14 +49,10 @@
             border-radius: 6px;
             display: inline-block;
         }
-        .status-badge.approved { background-color: #d4edda; color: #155724; }
-        .status-badge.rejected { background-color: #f8d7da; color: #721c24; }
-        .status-badge.pending { background-color: #fff3cd; color: #856404; }
+        .status-badge.approved { background-color: #2e7d32; color: #e8f5e9; }
+        .status-badge.rejected { background-color: #c62828; color: #ffebee; }
+        .status-badge.pending { background-color: #ff8f00; color: #fff3e0; }
 
-        .navbar-status {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-        }
         .navbar-status .badge {
             font-size: 0.9rem;
             padding: 0.5em 0.9em;
@@ -36,29 +63,31 @@
         .navbar-status .badge.pending { background-color: var(--status-pending); color: #212529; }
 
         .main-section-title {
-            background: linear-gradient(to right, #6f42c1, #4e35a7);
+            background: linear-gradient(90deg, #6d7bff, #4a5de0);
             color: white;
             padding: 1rem 1.5rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(109, 123, 255, 0.2);
         }
 
-        .card-header {
-            font-weight: bold;
+        .track-list, .modal-track-list {
+            list-style: decimal;
+            padding-left: 1.8em;
+            margin: 0.3em 0;
         }
-        .track-list { list-style: disc; padding-left: 1.5em; margin: 0.3em 0; }
-        .field-label { font-weight: 600; color: #555; }
-        .field-value { word-break: break-word; }
-        .link-icon { font-size: 0.85em; margin-left: 0.3em; }
-        .hidden-section { display: none; }
+
+        .field-label, .modal-label {
+            font-weight: 600;
+            color: #8c99b0;
+        }
 
         .moderation-btns {
             display: flex;
             gap: 0.5rem;
             margin-top: 1rem;
         }
-        .btn-moderate {
+        .btn-moderate, .btn-detail {
             flex: 1;
             font-weight: bold;
             display: flex;
@@ -70,6 +99,11 @@
         .btn-detail {
             font-size: 0.85rem;
             margin-top: 0.5rem;
+            background: rgba(255,255,255,0.05);
+            border-color: var(--border-color);
+        }
+        .btn-detail:hover {
+            background: rgba(255,255,255,0.1);
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -78,11 +112,36 @@
         .card.fade-out { animation: fadeOut 0.4s ease-out forwards; }
 
         /* Модалка */
-        .modal-xl { max-width: 95%; }
-        .modal-body .row { margin-bottom: 0.8rem; }
-        .modal-label { font-weight: 600; color: #495057; }
-        .modal-value { word-break: break-word; }
-        .modal-track-list { list-style: decimal; padding-left: 1.8em; margin: 0.3em 0; }
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.02);
+        }
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.02);
+        }
+        .btn-close {
+            filter: invert(1);
+        }
+
+        /* Кнопки копирования */
+        .copy-btn {
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-left: 0.4rem;
+            font-size: 0.85em;
+        }
+        .modal-row:hover .copy-btn {
+            opacity: 1;
+        }
+        .copy-btn:hover {
+            color: #6d7bff !important;
+        }
     </style>
 </head>
 <body>
@@ -90,12 +149,12 @@
 <!-- 🔝 Шапка -->
 <nav class="navbar navbar-expand navbar-status">
     <div class="container">
-        <a class="navbar-brand fw-bold text-primary" href="#">
-            🎵 Модерация релизов
+        <a class="navbar-brand fw-bold" href="#">
+            🎵 <strong>CDCULT Moderation</strong>
         </a>
         <div class="d-flex align-items-center">
             <small class="text-muted me-3" id="lastUpdate">—</small>
-            <button id="refreshBtn" class="btn btn-sm btn-outline-primary me-2">🔄 Обновить</button>
+            <button id="refreshBtn" class="btn btn-sm btn-outline-light me-2">🔄 Обновить</button>
             <div class="d-flex">
                 <a href="#approvedSection" class="badge approved">✅ Одобрено: <span id="count-approved">0</span></a>
                 <a href="#rejectedSection" class="badge rejected">❌ Отклонено: <span id="count-rejected">0</span></a>
@@ -166,8 +225,8 @@
                 <p><strong id="rejectReleaseTitle">Название релиза</strong></p>
                 <div class="mb-3">
                     <label for="rejectComment" class="form-label">Комментарий (обязательно):</label>
-                    <textarea class="form-control" id="rejectComment" rows="3" placeholder="Укажите причину отклонения..." required></textarea>
-                    <div class="form-text">Будет записан в колонку «Комментарий» в Google Таблице.</div>
+                    <textarea class="form-control bg-dark text-light" id="rejectComment" rows="3" placeholder="Укажите причину отклонения..." required></textarea>
+                    <div class="form-text text-muted">Будет записан в колонку «Комментарий» в Google Таблице.</div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -181,6 +240,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+// 🔗 ⚠️ ВСТАВЬТЕ СВОЙ URL ЗДЕСЬ (строка 291)
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxs4pwPLWgEsUT__eZD0-SDRXneiz4WK8F4zRuUxvcXbdLeObUxqta_awHa4BiOpQo/exec';
 const UPDATE_URL = WEB_APP_URL;
 
@@ -205,7 +265,34 @@ const el = {
     approveModalBtn: document.querySelector('.approve-modal-btn')
 };
 
-let currentRelease = null; // хранит объект релиза для модалок
+let currentRelease = null;
+
+// ✅ Форматирование даты: "2025-11-14T20:00:00.000Z" → "14.11.2025"
+function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}.${month}.${year}`;
+}
+
+// 📋 Копирование в буфер
+function copyToClipboard(text, btn) {
+    if (!text) return;
+    navigator.clipboard.writeText(text.trim()).then(() => {
+        const original = btn.innerHTML;
+        btn.innerHTML = '✅ Скопировано';
+        btn.style.color = '#4caf50';
+        setTimeout(() => {
+            btn.innerHTML = original;
+            btn.style.color = '';
+        }, 1500);
+    }).catch(err => {
+        console.error('Не удалось скопировать:', err);
+    });
+}
 
 // Утилиты
 const makeLink = (url, text = null) => url && url.trim() ? 
@@ -235,7 +322,7 @@ function classify(row) {
     return 'other';
 }
 
-// 📋 Создание карточки
+// 🎨 Создание карточки
 function createCard(data) {
     const isPending = classify(data) === 'pending';
     const releaseTitle = data['Название релиза'] || 'Без названия';
@@ -267,10 +354,10 @@ function createCard(data) {
                     ${getStatusBadge(data['Статус'])}
                 </div>
                 <div class="card-body">
-                    <p class="mb-1"><span class="field-label">Артист(-ы):</span> ${data['Основные артист(-ы)'] || '—'}</p>
-                    <p class="mb-1"><span class="field-label">Тип:</span> ${data['Тип релиза'] || '—'}</p>
-                    <p class="mb-1"><span class="field-label">Дата выхода:</span> <strong>${data['Дата выхода'] || '—'}</strong></p>
-                    <p class="mb-1"><span class="field-label">Жанр:</span> ${data['Жанр релиза'] || '—'}</p>
+                    <p class="mb-1"><span class="field-label">Артист(-ы):</span> ${escapeHtml(data['Основные артист(-ы)'] || '—')}</p>
+                    <p class="mb-1"><span class="field-label">Тип:</span> ${escapeHtml(data['Тип релиза'] || '—')}</p>
+                    <p class="mb-1"><span class="field-label">Дата выхода:</span> <strong>${formatDate(data['Дата выхода'])}</strong></p>
+                    <p class="mb-1"><span class="field-label">Жанр:</span> ${escapeHtml(data['Жанр релиза'] || '—')}</p>
 
                     ${buttons}
                 </div>
@@ -279,100 +366,78 @@ function createCard(data) {
     `;
 }
 
-// 📄 Формирование модального контента
+// 📋 Генерация строки с кнопкой копирования
+function makeRow(label, value, fieldName = null, isTracks = false) {
+    const escaped = escapeHtml(value || '—');
+    const display = isTracks ? formatTracks(value) : escaped;
+    const copyBtn = fieldName ? 
+        `<button type="button" class="btn btn-sm btn-outline-light copy-btn" onclick="copyToClipboard(${JSON.stringify(value || '')}, this)">📋</button>` 
+        : '';
+    return `
+        <div class="row modal-row align-items-start mb-2">
+            <div class="col-3 col-md-2"><span class="modal-label">${label}:</span></div>
+            <div class="col-9 col-md-10 d-flex align-items-center">
+                <span class="modal-value">${display}</span>
+                ${copyBtn}
+            </div>
+        </div>
+    `;
+}
+
+// 📄 Модальное окно — с кнопками копирования
 function renderModalContent(data) {
     return `
         <div class="row">
             <div class="col-md-6">
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Название:</span></div>
-                    <div class="col-8"><span class="modal-value">${escapeHtml(data['Название релиза'] || '—')}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Артист(-ы):</span></div>
-                    <div class="col-8"><span class="modal-value">${escapeHtml(data['Основные артист(-ы)'] || '—')}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Тип релиза:</span></div>
-                    <div class="col-8"><span class="modal-value">${escapeHtml(data['Тип релиза'] || '—')}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Подзаголовок:</span></div>
-                    <div class="col-8"><span class="modal-value">${escapeHtml(data['Подзаголовок'] || '—')}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Дата выхода:</span></div>
-                    <div class="col-8"><span class="modal-value"><strong>${escapeHtml(data['Дата выхода'] || '—')}</strong></span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Ориг. дата:</span></div>
-                    <div class="col-8"><span class="modal-value">${escapeHtml(data['Дата оригинального релиза (если есть)'] || '—')}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Жанр:</span></div>
-                    <div class="col-8"><span class="modal-value">${escapeHtml(data['Жанр релиза'] || '—')}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Мат:</span></div>
-                    <div class="col-8"><span class="modal-value">${data['Ненормативная лексика'] === 'Да' ? '⚠️ Да' : '✅ Нет'}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Перенос:</span></div>
-                    <div class="col-8"><span class="modal-value">${escapeHtml(data['Вы переносите или перезаливаете релиз'] || '—')}</span></div>
-                </div>
+                ${makeRow('Название', data['Название релиза'], 'title')}
+                ${makeRow('Артист(-ы)', data['Основные артист(-ы)'], 'artist')}
+                ${makeRow('Подзаголовок', data['Подзаголовок'], 'subtitle')}
+                ${makeRow('Дата выхода', formatDate(data['Дата выхода']))}
+                ${makeRow('Ориг. дата', formatDate(data['Дата оригинального релиза (если есть)']))}
+                ${makeRow('Жанр', data['Жанр релиза'])}
+                ${makeRow('Мат', data['Ненормативная лексика'] === 'Да' ? '⚠️ Да' : '✅ Нет')}
+                ${makeRow('Перенос', data['Вы переносите или перезаливаете релиз'])}
             </div>
             <div class="col-md-6">
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">UPC:</span></div>
-                    <div class="col-8"><span class="modal-value">${escapeHtml(data['UPC (если есть)'] || '—')}</span></div>
+                ${makeRow('UPC', data['UPC (если есть)'], 'upc')}
+                ${makeRow('Авторы текста', data['ФИО автора(-ов) текста'], 'lyrics')}
+                ${makeRow('Авторы инстр.', data['ФИО автора(-ов) инструментала'], 'music')}
+                ${makeRow('Треки', data['Названия треков'], 'tracks', true)}
+                <div class="row mb-2">
+                    <div class="col-3 col-md-2"><span class="modal-label">Архив:</span></div>
+                    <div class="col-9 col-md-10"><span class="modal-value">${makeLink(data['Ссылка на архив'])}</span></div>
                 </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Авторы текста:</span></div>
-                    <div class="col-8"><span class="modal-value">${escapeHtml(data['ФИО автора(-ов) текста'] || '—')}</span></div>
+                <div class="row mb-2">
+                    <div class="col-3 col-md-2"><span class="modal-label">Spotify:</span></div>
+                    <div class="col-9 col-md-10"><span class="modal-value">${makeLink(data['Ссылка на Spotify (если есть)'], 'открыть')}</span></div>
                 </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Авторы инстр.:</span></div>
-                    <div class="col-8"><span class="modal-value">${escapeHtml(data['ФИО автора(-ов) инструментала'] || '—')}</span></div>
+                <div class="row mb-2">
+                    <div class="col-3 col-md-2"><span class="modal-label">Apple Music:</span></div>
+                    <div class="col-9 col-md-10"><span class="modal-value">${makeLink(data['Ссылка на Apple Music (если есть)'], 'открыть')}</span></div>
                 </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Треки:</span></div>
-                    <div class="col-8"><span class="modal-value">${formatTracks(data['Названия треков'])}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Архив:</span></div>
-                    <div class="col-8"><span class="modal-value">${makeLink(data['Ссылка на архив'])}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Spotify:</span></div>
-                    <div class="col-8"><span class="modal-value">${makeLink(data['Ссылка на Spotify (если есть)'], 'открыть')}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Apple Music:</span></div>
-                    <div class="col-8"><span class="modal-value">${makeLink(data['Ссылка на Apple Music (если есть)'], 'открыть')}</span></div>
-                </div>
-                <div class="row">
-                    <div class="col-4"><span class="modal-label">Telegram:</span></div>
-                    <div class="col-8"><span class="modal-value">${getTelegramLink(data['Telegram'])}</span></div>
+                <div class="row mb-2">
+                    <div class="col-3 col-md-2"><span class="modal-label">Telegram:</span></div>
+                    <div class="col-9 col-md-10"><span class="modal-value">${getTelegramLink(data['Telegram'])}</span></div>
                 </div>
             </div>
         </div>
         <hr>
         <div class="row">
             <div class="col-12">
-                <div class="row">
+                <div class="row mb-2">
                     <div class="col-2"><span class="modal-label">Комментарий:</span></div>
-                    <div class="col-10"><span class="modal-value text-danger">${escapeHtml(data['Доп. Комментарий'] || '—')}</span></div>
+                    <div class="col-10"><span class="modal-value text-warning">${escapeHtml(data['Доп. Комментарий'] || '—')}</span></div>
                 </div>
-                <div class="row mt-2">
+                <div class="row">
                     <div class="col-2"><span class="modal-label">Внутр. комментарий:</span></div>
-                    <div class="col-10"><span class="modal-value text-warning">${escapeHtml(data['Комментарий'] || '—')}</span></div>
+                    <div class="col-10"><span class="modal-value text-danger">${escapeHtml(data['Комментарий'] || '—')}</span></div>
                 </div>
             </div>
         </div>
     `;
 }
 
-// ✅/❌ Обновление статуса
+// ✅/❌ Обновление
 async function updateStatus(releaseTitle, status, comment = null) {
     const col = document.querySelector(`.col[data-title="${encodeURIComponent(releaseTitle)}"]`);
     if (!col) return;
@@ -451,7 +516,7 @@ function render(data) {
             if (!encodedTitle) return;
             const title = decodeURIComponent(encodedTitle);
             updateStatus(title, 'green');
-            bootstrap.Modal.getInstance(el.detailModal || document.getElementById('detailModal'))?.hide();
+            bootstrap.Modal.getInstance(document.getElementById('detailModal'))?.hide();
         });
     });
 

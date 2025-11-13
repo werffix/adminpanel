@@ -437,40 +437,85 @@ function renderModalContent(data) {
     `;
 }
 
-// ✅/❌ Обновление
+// ✅ ИСПРАВЛЕНА: надёжная отправка с логированием
 async function updateStatus(releaseTitle, status, comment = null) {
+    // Защита от undefined / null
+    if (!releaseTitle || typeof releaseTitle !== 'string') {
+        alert('❌ Ошибка: название релиза не найдено');
+        return;
+    }
+
     const col = document.querySelector(`.col[data-title="${encodeURIComponent(releaseTitle)}"]`);
-    if (!col) return;
+    if (!col) {
+        alert(`❌ Карточка "${releaseTitle}" не найдена на странице`);
+        return;
+    }
 
     const card = col.querySelector('.card');
     card.classList.add('fade-out');
-    card.querySelectorAll('.btn-moderate, .detail-btn').forEach(btn => btn.disabled = true);
+    card.querySelectorAll('.btn-moderate, .detail-btn, .btn-download').forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+    });
 
     try {
+        // 🔍 Отладка: логируем, что отправляем
+        console.log('➤ Отправка в таблицу:', { releaseTitle, status, comment });
+
         const payload = { releaseTitle, status };
         if (comment !== null) payload.comment = comment;
 
         const response = await fetch(UPDATE_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            mode: 'cors', // явно включаем CORS
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8',
+            },
             body: JSON.stringify(payload)
         });
 
-        const result = await response.json();
+        // 🔍 Логируем ответ
+        console.log('➤ Ответ от Google:', response.status, response.statusText);
 
-        if (result.success) {
-            setTimeout(() => {
-                col.remove();
-                updateCounts();
-            }, 400);
-        } else {
-            throw new Error(result.error || 'Неизвестная ошибка');
+        // Читаем текст ответа (даже если не JSON — для отладки)
+        const text = await response.text();
+        console.log('➤ Тело ответа:', text);
+
+        // Пытаемся распарсить как JSON
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            throw new Error(`Сервер вернул не-JSON: ${text.substring(0, 100)}...`);
         }
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${result.error || 'Неизвестная ошибка'}`);
+        }
+
+        if (!result.success) {
+            throw new Error(result.error || 'Ошибка обновления');
+        }
+
+        // ✅ Успех — удаляем карточку
+        setTimeout(() => {
+            col.remove();
+            updateCounts();
+            console.log(`✅ "${releaseTitle}" обновлён: ${status}${comment ? ` + комментарий` : ''}`);
+        }, 400);
+
     } catch (err) {
-        console.error('Ошибка:', err);
+        console.error('❌ Ошибка обновления:', err);
+        
+        // Восстанавливаем карточку
         card.classList.remove('fade-out');
-        card.querySelectorAll('.btn-moderate, .detail-btn').forEach(btn => btn.disabled = false);
-        alert(`❌ Ошибка:\n${err.message}`);
+        card.querySelectorAll('.btn-moderate, .detail-btn, .btn-download').forEach(btn => {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        });
+        
+        // Показываем понятную ошибку
+        alert(`❌ Не удалось обновить релиз:\n${err.message}\n\nОткройте Консоль (F12) для деталей.`);
     }
 }
 
@@ -596,4 +641,5 @@ loadReleases();
 
 </body>
 </html>
+
 

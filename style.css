@@ -1,0 +1,20 @@
+/* ✅ Фон "Релизы на рассмотрении" — ЧЁРНЫЙ */
+.pending-section-bg {
+    background: #0f0f14; /* ← было white → стало чёрным */
+    color: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    margin-bottom: 2rem;
+}
+
+/* ✅ Заголовок — белый текст на чёрном фоне */
+.main-section-title {
+    background: #1a1a22; /* тёмно-серый для контраста */
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-weight: bold;
+}

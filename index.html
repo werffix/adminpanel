@@ -27,8 +27,10 @@
             border-bottom: 1px solid var(--border-color);
         }
 
+        /* ✅ CDCULT Moderation — белый, без смайлика */
         .navbar-brand {
-            color: #6d7bff !important;
+            color: #f8f9fa !important;
+            font-weight: bold;
         }
 
         .card {
@@ -62,13 +64,25 @@
         .navbar-status .badge.rejected { background-color: var(--status-rejected); color: white; }
         .navbar-status .badge.pending { background-color: var(--status-pending); color: #212529; }
 
+        /* ✅ Фон "Релизы на рассмотрении" — белый */
+        .pending-section-bg {
+            background: white;
+            color: #212529;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+        }
+
+        /* ✅ Головной блок — белый фон */
         .main-section-title {
-            background: linear-gradient(90deg, #6d7bff, #4a5de0);
-            color: white;
+            background: white; /* ✅ был градиент → стал белым */
+            color: #212529; /* ✅ текст — тёмный для контраста */
             padding: 1rem 1.5rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
-            box-shadow: 0 4px 12px rgba(109, 123, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-weight: bold;
         }
 
         .track-list, .modal-track-list {
@@ -79,7 +93,7 @@
 
         .field-label, .modal-label {
             font-weight: 600;
-            color: #8c99b0;
+            color: #6c757d;
         }
 
         .moderation-btns {
@@ -87,7 +101,7 @@
             gap: 0.5rem;
             margin-top: 1rem;
         }
-        .btn-moderate, .btn-detail {
+        .btn-moderate {
             flex: 1;
             font-weight: bold;
             display: flex;
@@ -96,14 +110,32 @@
             gap: 0.4rem;
         }
 
+        /* ✅ Кнопки в карточке */
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+        }
         .btn-detail {
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-            background: rgba(255,255,255,0.05);
-            border-color: var(--border-color);
+            flex: 1;
+            background: white !important; /* ✅ белая */
+            color: #212529 !important;
+            border-color: #ced4da !important;
+            font-weight: 500;
         }
         .btn-detail:hover {
-            background: rgba(255,255,255,0.1);
+            background: #f1f3f5 !important;
+            color: #495057 !important;
+        }
+        .btn-download {
+            flex: 0 0 auto;
+            background: #6c757d !important;
+            color: white !important;
+            border: none !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+        .btn-download:hover {
+            background: #5a6268 !important;
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -111,7 +143,7 @@
         .card.fade-in { animation: fadeIn 0.4s ease-out; }
         .card.fade-out { animation: fadeOut 0.4s ease-out forwards; }
 
-        /* Модалка */
+        /* Модалки */
         .modal-content {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -129,7 +161,6 @@
             filter: invert(1);
         }
 
-        /* Кнопки копирования */
         .copy-btn {
             opacity: 0;
             transition: opacity 0.2s;
@@ -142,6 +173,11 @@
         .copy-btn:hover {
             color: #6d7bff !important;
         }
+
+        /* ✅ "Нет релизов" — белый текст */
+        #noPending {
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -149,11 +185,13 @@
 <!-- 🔝 Шапка -->
 <nav class="navbar navbar-expand navbar-status">
     <div class="container">
+        <!-- ✅ CDCULT Moderation — белый, без смайлика -->
         <a class="navbar-brand fw-bold" href="#">
-            🎵 <strong>CDCULT Moderation</strong>
+            CDCULT Moderation
         </a>
         <div class="d-flex align-items-center">
-            <small class="text-muted me-3" id="lastUpdate">—</small>
+            <!-- ✅ Дата — белая, слева -->
+            <small class="text-light me-2" id="lastUpdate">—</small>
             <button id="refreshBtn" class="btn btn-sm btn-outline-light me-2">🔄 Обновить</button>
             <div class="d-flex">
                 <a href="#approvedSection" class="badge approved">✅ Одобрено: <span id="count-approved">0</span></a>
@@ -165,21 +203,27 @@
 </nav>
 
 <div class="container py-4">
-    <div class="main-section-title">
-        <h2 class="mb-0">📬 Релизы на рассмотрении</h2>
-        <small>Нажмите ✅ / ❌ или «Подробнее» для полного просмотра</small>
-    </div>
 
-    <div id="loading" class="text-center py-4">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Загрузка...</span>
+    <!-- ✅ Белый блок -->
+    <div class="pending-section-bg">
+        <div class="main-section-title">
+            <!-- ✅ Удалён подзаголовок -->
+            <h2 class="mb-0">📬 Релизы на рассмотрении</h2>
         </div>
-        <p class="mt-2 text-muted">Загружаем релизы...</p>
-    </div>
 
-    <div id="pendingCards" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-5"></div>
-    <div id="noPending" class="text-center text-muted py-5 d-none">
-        <h4>📭 Нет релизов на рассмотрении</h4>
+        <div id="loading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="mt-2 text-muted">Загружаем релизы...</p>
+        </div>
+
+        <div id="pendingCards" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"></div>
+
+        <!-- ✅ Белый текст -->
+        <div id="noPending" class="text-center py-5 d-none">
+            <h4>📭 Нет релизов на рассмотрении</h4>
+        </div>
     </div>
 
     <div id="approvedSection" class="hidden-section mb-5">
@@ -193,17 +237,15 @@
     </div>
 </div>
 
-<!-- 🔍 Модальное окно "Подробнее" -->
-<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel">
+<!-- Модалки (без изменений) -->
+<div class="modal fade" id="detailModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="detailModalLabel">📜 Подробная информация</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                <h5 class="modal-title">📜 Подробная информация</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="modalContent">
-                <!-- Заполняется динамически -->
-            </div>
+            <div class="modal-body" id="modalContent"></div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                 <button type="button" class="btn btn-success approve-modal-btn">✅ Одобрить</button>
@@ -213,13 +255,12 @@
     </div>
 </div>
 
-<!-- 🚫 Модальное окно "Отклонить" -->
-<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel">
+<div class="modal fade" id="rejectModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="rejectModalLabel">❌ Отклонить релиз</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                <h5 class="modal-title">❌ Отклонить релиз</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p><strong id="rejectReleaseTitle">Название релиза</strong></p>
@@ -240,11 +281,9 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// 🔗 ⚠️ ВСТАВЬТЕ СВОЙ URL ЗДЕСЬ (строка 291)
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxs4pwPLWgEsUT__eZD0-SDRXneiz4WK8F4zRuUxvcXbdLeObUxqta_awHa4BiOpQo/exec';
 const UPDATE_URL = WEB_APP_URL;
 
-// DOM
 const el = {
     loading: document.getElementById('loading'),
     noPending: document.getElementById('noPending'),
@@ -267,18 +306,13 @@ const el = {
 
 let currentRelease = null;
 
-// ✅ Форматирование даты: "2025-11-14T20:00:00.000Z" → "14.11.2025"
 function formatDate(dateStr) {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
     if (isNaN(d)) return dateStr;
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}.${month}.${year}`;
+    return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
 }
 
-// 📋 Копирование в буфер
 function copyToClipboard(text, btn) {
     if (!text) return;
     navigator.clipboard.writeText(text.trim()).then(() => {
@@ -289,12 +323,9 @@ function copyToClipboard(text, btn) {
             btn.innerHTML = original;
             btn.style.color = '';
         }, 1500);
-    }).catch(err => {
-        console.error('Не удалось скопировать:', err);
-    });
+    }).catch(err => console.error('Не удалось скопировать:', err));
 }
 
-// Утилиты
 const makeLink = (url, text = null) => url && url.trim() ? 
   `<a href="${url}" target="_blank" class="text-primary">${text || (url.length > 50 ? url.slice(0,47)+'…' : url)} <span class="link-icon">↗</span></a>` 
   : '—';
@@ -322,11 +353,28 @@ function classify(row) {
     return 'other';
 }
 
-// 🎨 Создание карточки
+// ✅ Создание карточки — с кнопкой "Скачать"
 function createCard(data) {
     const isPending = classify(data) === 'pending';
     const releaseTitle = data['Название релиза'] || 'Без названия';
     const safeTitle = escapeHtml(releaseTitle);
+    const archiveUrl = data['Ссылка на архив'] || '';
+
+    // ✅ Кнопки: Подробнее (белая) + Скачать (серая)
+    const actionBtns = `
+        <div class="action-btns">
+            <button class="btn btn-sm btn-detail detail-btn" data-title="${encodeURIComponent(releaseTitle)}">
+                📋 Подробнее
+            </button>
+            ${archiveUrl ? `
+            <a href="${archiveUrl}" target="_blank" class="btn btn-sm btn-download" title="Скачать архив">
+                ⬇️
+            </a>` : `
+            <button class="btn btn-sm btn-download" disabled title="Архив не указан">
+                ⬇️
+            </button>`}
+        </div>
+    `;
 
     const buttons = isPending ? `
         <div class="moderation-btns">
@@ -337,14 +385,8 @@ function createCard(data) {
                 ❌ Отклонить
             </button>
         </div>
-        <button class="btn btn-outline-secondary btn-sm btn-detail detail-btn" data-title="${encodeURIComponent(releaseTitle)}">
-            📋 Подробнее
-        </button>
-    ` : `
-        <button class="btn btn-outline-secondary btn-sm btn-detail detail-btn" data-title="${encodeURIComponent(releaseTitle)}">
-            📋 Подробнее
-        </button>
-    `;
+        ${actionBtns}
+    ` : actionBtns;
 
     return `
         <div class="col" data-title="${encodeURIComponent(releaseTitle)}">
@@ -358,7 +400,6 @@ function createCard(data) {
                     <p class="mb-1"><span class="field-label">Тип:</span> ${escapeHtml(data['Тип релиза'] || '—')}</p>
                     <p class="mb-1"><span class="field-label">Дата выхода:</span> <strong>${formatDate(data['Дата выхода'])}</strong></p>
                     <p class="mb-1"><span class="field-label">Жанр:</span> ${escapeHtml(data['Жанр релиза'] || '—')}</p>
-
                     ${buttons}
                 </div>
             </div>
@@ -366,7 +407,6 @@ function createCard(data) {
     `;
 }
 
-// 📋 Генерация строки с кнопкой копирования
 function makeRow(label, value, fieldName = null, isTracks = false) {
     const escaped = escapeHtml(value || '—');
     const display = isTracks ? formatTracks(value) : escaped;
@@ -384,7 +424,6 @@ function makeRow(label, value, fieldName = null, isTracks = false) {
     `;
 }
 
-// 📄 Модальное окно — с кнопками копирования
 function renderModalContent(data) {
     return `
         <div class="row">
@@ -437,14 +476,13 @@ function renderModalContent(data) {
     `;
 }
 
-// ✅/❌ Обновление
 async function updateStatus(releaseTitle, status, comment = null) {
     const col = document.querySelector(`.col[data-title="${encodeURIComponent(releaseTitle)}"]`);
     if (!col) return;
 
     const card = col.querySelector('.card');
     card.classList.add('fade-out');
-    card.querySelectorAll('.btn-moderate, .detail-btn').forEach(btn => btn.disabled = true);
+    card.querySelectorAll('.btn-moderate, .detail-btn, .btn-download').forEach(btn => btn.disabled = true);
 
     try {
         const payload = { releaseTitle, status };
@@ -469,7 +507,7 @@ async function updateStatus(releaseTitle, status, comment = null) {
     } catch (err) {
         console.error('Ошибка:', err);
         card.classList.remove('fade-out');
-        card.querySelectorAll('.btn-moderate, .detail-btn').forEach(btn => btn.disabled = false);
+        card.querySelectorAll('.btn-moderate, .detail-btn, .btn-download').forEach(btn => btn.disabled = false);
         alert(`❌ Ошибка:\n${err.message}`);
     }
 }
@@ -504,48 +542,47 @@ function render(data) {
     document.getElementById('approvedSection').style.display = approved.length ? 'block' : 'none';
     document.getElementById('rejectedSection').style.display = rejected.length ? 'block' : 'none';
 
+    // ✅ Дата — белая (уже задано в HTML)
     el.lastUpdate.textContent = new Date().toLocaleString('ru-RU', {
         day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
     });
 
-    // 🔘 Обработчики
+    // 🔘 Обработчики — переподключаем после рендеринга
     document.querySelectorAll('.approve-btn, .approve-modal-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.onclick = function() {
             const el = this.closest('.col') || this.closest('.modal');
             const encodedTitle = el.querySelector('[data-title]')?.dataset.title || currentRelease?.['Название релиза'];
             if (!encodedTitle) return;
             const title = decodeURIComponent(encodedTitle);
             updateStatus(title, 'green');
             bootstrap.Modal.getInstance(document.getElementById('detailModal'))?.hide();
-        });
+        };
     });
 
     document.querySelectorAll('.reject-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.onclick = function() {
             const encodedTitle = this.dataset.title;
             const title = decodeURIComponent(encodedTitle);
             currentRelease = data.find(r => r['Название релиза'] === title);
             el.rejectReleaseTitle.textContent = title;
             el.rejectComment.value = '';
-            const rejectModal = new bootstrap.Modal(el.rejectModal);
-            rejectModal.show();
-        });
+            bootstrap.Modal.getOrCreateInstance(el.rejectModal).show();
+        };
     });
 
     document.querySelectorAll('.detail-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.onclick = function() {
             const encodedTitle = this.dataset.title;
             const title = decodeURIComponent(encodedTitle);
             currentRelease = data.find(r => r['Название релиза'] === title);
             if (currentRelease) {
                 el.modalContent.innerHTML = renderModalContent(currentRelease);
-                const modal = new bootstrap.Modal(el.detailModal);
-                modal.show();
+                bootstrap.Modal.getOrCreateInstance(el.detailModal).show();
             }
-        });
+        };
     });
 
-    el.confirmRejectBtn.addEventListener('click', function() {
+    el.confirmRejectBtn.onclick = function() {
         if (!currentRelease) return;
         const comment = el.rejectComment.value.trim();
         if (!comment) {
@@ -555,11 +592,9 @@ function render(data) {
         el.rejectComment.classList.remove('is-invalid');
         updateStatus(currentRelease['Название релиза'], 'red', comment);
         bootstrap.Modal.getInstance(el.rejectModal).hide();
-    });
+    };
 
-    el.rejectComment.addEventListener('input', () => {
-        el.rejectComment.classList.remove('is-invalid');
-    });
+    el.rejectComment.oninput = () => el.rejectComment.classList.remove('is-invalid');
 }
 
 async function loadReleases() {
@@ -578,6 +613,7 @@ async function loadReleases() {
 }
 
 el.refreshBtn.addEventListener('click', loadReleases);
+
 document.querySelectorAll('a[href^="#"]').forEach(link => {
     link.addEventListener('click', function(e) {
         e.preventDefault();

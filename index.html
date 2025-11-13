@@ -64,26 +64,23 @@
         .navbar-status .badge.rejected { background-color: var(--status-rejected); color: white; }
         .navbar-status .badge.pending { background-color: var(--status-pending); color: #212529; }
 
+        /* ✅ Исправлено: фон блока — белый, карточки — тёмные */
         .pending-section {
-            background: white;
-            color: #212529;
+            background: white; /* ✅ фон прямоугольника — белый */
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             margin-bottom: 2rem;
         }
-        .pending-section .card,
-        .pending-section .card-header,
-        .pending-section .btn {
-            color: #212529 !important;
-        }
+        /* ✅ Карточки — как в остальном интерфейсе (тёмные) */
         .pending-section .card {
-            background-color: #ffffff !important;
-            border: 1px solid #e0e0e0;
+            background-color: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
         }
         .pending-section .card-header {
-            background-color: #f8f9fa !important;
-            border-bottom: 1px solid #e9ecef;
+            background-color: rgba(255,255,255,0.03) !important;
+            border-bottom: 1px solid var(--border-color) !important;
         }
 
         .main-section-title {
@@ -103,7 +100,7 @@
 
         .field-label, .modal-label {
             font-weight: 600;
-            color: #6c757d;
+            color: #8c99b0;
         }
 
         .moderation-btns {
@@ -125,6 +122,7 @@
             gap: 0.5rem;
             margin-top: 0.8rem;
         }
+        /* ✅ Кнопка "Подробнее" — белая */
         .btn-detail {
             flex: 1;
             background: white !important;
@@ -136,6 +134,7 @@
             background: #f1f3f5 !important;
             color: #495057 !important;
         }
+        /* Кнопка "Скачать" */
         .btn-download {
             flex: 0 0 auto;
             background: #6c757d !important;
@@ -145,7 +144,6 @@
         }
         .btn-download:hover {
             background: #5a6268 !important;
-            color: white !important;
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -183,7 +181,7 @@
             color: #6d7bff !important;
         }
 
-        /* 🔐 Модалка входа — обновлённый дизайн */
+        /* 🔐 Авторизация */
         .auth-modal .modal-dialog {
             max-width: 400px;
         }
@@ -196,26 +194,21 @@
             border: 1px solid #444;
             color: white;
         }
-        .auth-modal .form-control:focus {
-            background: #2c2c38;
-            border-color: #6d7bff;
-            box-shadow: 0 0 0 0.2rem rgba(109, 123, 255, 0.25);
-        }
         .auth-logo {
             font-size: 1.8rem;
             font-weight: bold;
-            color: white; /* ✅ CDCULT Moderation — БЕЛЫЙ */
+            color: white; /* ✅ белый */
             margin-bottom: 1rem;
             text-align: center;
         }
         .auth-subtitle {
-            color: white; /* ✅ "Введите пароль..." — БЕЛЫЙ */
+            color: white; /* ✅ белый */
             text-align: center;
             margin-bottom: 1.5rem;
             opacity: 0.9;
         }
         .btn-login {
-            background: white !important; /* ✅ кнопка Войти — БЕЛАЯ */
+            background: white !important; /* ✅ белая кнопка */
             color: #212529 !important;
             font-weight: 600;
             border: none !important;
@@ -230,11 +223,16 @@
             border-color: #5d2525;
             color: #f8d7da;
         }
+
+        /* ✅ "Нет релизов" — белый текст */
+        #noPending {
+            color: white;
+        }
     </style>
 </head>
 <body>
 
-<!-- 🔐 Модальное окно авторизации -->
+<!-- 🔐 Вход -->
 <div class="modal fade auth-modal show d-block" id="authModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -258,14 +256,14 @@
     </div>
 </div>
 
-<!-- 🔝 Шапка (изначально скрыта) -->
+<!-- 📋 Основной интерфейс -->
 <nav class="navbar navbar-expand navbar-status d-none" id="mainNav">
     <div class="container">
         <a class="navbar-brand fw-bold" href="#">
             🎵 CDCULT Moderation
         </a>
         <div class="d-flex align-items-center">
-            <!-- ✅ Дата обновления — белая, слева -->
+            <!-- ✅ Дата — белая, слева -->
             <small class="text-light me-2" id="lastUpdate">—</small>
             <button id="refreshBtn" class="btn btn-sm btn-outline-light me-2">🔄 Обновить</button>
             <div class="d-flex">
@@ -279,7 +277,7 @@
 
 <div class="container py-4 d-none" id="mainContent">
 
-    <!-- ✅ Белый блок без подзаголовка -->
+    <!-- ✅ Фон блока — белый, карточки — тёмные -->
     <div class="pending-section">
         <div class="main-section-title">
             <h2 class="mb-0 text-white">📬 Релизы на рассмотрении</h2>
@@ -294,12 +292,13 @@
 
         <div id="pendingCards" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"></div>
 
-        <!-- ✅ "Нет релизов" — белый текст, только при 0 -->
-        <div id="noPending" class="text-center py-5 text-white d-none">
+        <!-- ✅ Белый текст -->
+        <div id="noPending" class="text-center py-5 d-none">
             <h4>📭 Нет релизов на рассмотрении</h4>
         </div>
     </div>
 
+    <!-- Остальные секции -->
     <div id="approvedSection" class="hidden-section mb-5">
         <h3 class="text-success">✅ Одобрено</h3>
         <div id="approvedCards" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4"></div>
@@ -311,12 +310,12 @@
     </div>
 </div>
 
-<!-- 🔍 Модальные окна (без изменений) -->
+<!-- Модалки -->
 <div class="modal fade" id="detailModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="detailModalLabel">📜 Подробная информация</h5>
+                <h5 class="modal-title">📜 Подробная информация</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="modalContent"></div>
@@ -333,7 +332,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="rejectModalLabel">❌ Отклонить релиз</h5>
+                <h5 class="modal-title">❌ Отклонить релиз</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -355,7 +354,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// 🔐 Пароль
 const CORRECT_PASSWORD = 'cdcultadmin1!';
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxs4pwPLWgEsUT__eZD0-SDRXneiz4WK8F4zRuUxvcXbdLeObUxqta_awHa4BiOpQo/exec';
 const UPDATE_URL = WEB_APP_URL;
@@ -367,7 +365,6 @@ const el = {
     errorAlert: document.getElementById('errorAlert'),
     mainNav: document.getElementById('mainNav'),
     mainContent: document.getElementById('mainContent'),
-    
     loading: document.getElementById('loading'),
     noPending: document.getElementById('noPending'),
     pendingCards: document.getElementById('pendingCards'),
@@ -383,8 +380,7 @@ const el = {
     modalContent: document.getElementById('modalContent'),
     rejectReleaseTitle: document.getElementById('rejectReleaseTitle'),
     rejectComment: document.getElementById('rejectComment'),
-    confirmRejectBtn: document.getElementById('confirmRejectBtn'),
-    approveModalBtn: document.querySelector('.approve-modal-btn')
+    confirmRejectBtn: document.getElementById('confirmRejectBtn')
 };
 
 let currentRelease = null;
@@ -627,44 +623,36 @@ function render(data) {
         day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
     });
 
-    // Обработчики
-    document.querySelectorAll('.approve-btn, .approve-modal-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const el = this.closest('.col') || this.closest('.modal');
-            const encodedTitle = el.querySelector('[data-title]')?.dataset.title || currentRelease?.['Название релиза'];
-            if (!encodedTitle) return;
-            const title = decodeURIComponent(encodedTitle);
+    // 🔁 ВАЖНО: переподключаем обработчики ПОСЛЕ рендеринга
+    document.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.onclick = function() {
+            const title = decodeURIComponent(this.dataset.title);
             updateStatus(title, 'green');
-            bootstrap.Modal.getInstance(document.getElementById('detailModal'))?.hide();
-        });
+        };
     });
 
     document.querySelectorAll('.reject-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const encodedTitle = this.dataset.title;
-            const title = decodeURIComponent(encodedTitle);
+        btn.onclick = function() {
+            const title = decodeURIComponent(this.dataset.title);
             currentRelease = data.find(r => r['Название релиза'] === title);
             el.rejectReleaseTitle.textContent = title;
             el.rejectComment.value = '';
-            const rejectModal = new bootstrap.Modal(el.rejectModal);
-            rejectModal.show();
-        });
+            bootstrap.Modal.getOrCreateInstance(el.rejectModal).show();
+        };
     });
 
     document.querySelectorAll('.detail-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const encodedTitle = this.dataset.title;
-            const title = decodeURIComponent(encodedTitle);
+        btn.onclick = function() {
+            const title = decodeURIComponent(this.dataset.title);
             currentRelease = data.find(r => r['Название релиза'] === title);
             if (currentRelease) {
                 el.modalContent.innerHTML = renderModalContent(currentRelease);
-                const modal = new bootstrap.Modal(el.detailModal);
-                modal.show();
+                bootstrap.Modal.getOrCreateInstance(el.detailModal).show();
             }
-        });
+        };
     });
 
-    el.confirmRejectBtn.addEventListener('click', function() {
+    el.confirmRejectBtn.onclick = function() {
         if (!currentRelease) return;
         const comment = el.rejectComment.value.trim();
         if (!comment) {
@@ -674,11 +662,9 @@ function render(data) {
         el.rejectComment.classList.remove('is-invalid');
         updateStatus(currentRelease['Название релиза'], 'red', comment);
         bootstrap.Modal.getInstance(el.rejectModal).hide();
-    });
+    };
 
-    el.rejectComment.addEventListener('input', () => {
-        el.rejectComment.classList.remove('is-invalid');
-    });
+    el.rejectComment.oninput = () => el.rejectComment.classList.remove('is-invalid');
 }
 
 async function loadReleases() {
@@ -709,26 +695,19 @@ function checkPassword() {
         el.mainContent.classList.remove('d-none');
         document.body.style.overflow = 'auto';
         
-        loadReleases();
+        loadReleases(); // ✅ запускаем загрузку после входа
     } else {
         el.errorAlert.classList.remove('d-none');
         el.passwordInput.classList.add('is-invalid');
-        setTimeout(() => {
-            el.passwordInput.classList.remove('is-invalid');
-        }, 2000);
+        setTimeout(() => el.passwordInput.classList.remove('is-invalid'), 2000);
     }
 }
 
-el.loginBtn.addEventListener('click', checkPassword);
-el.passwordInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') checkPassword();
-});
+el.loginBtn.onclick = checkPassword;
+el.passwordInput.onkeypress = (e) => { if (e.key === 'Enter') checkPassword(); };
 
-setTimeout(() => {
-    el.passwordInput.focus();
-}, 300);
+setTimeout(() => el.passwordInput.focus(), 300);
 </script>
 
 </body>
 </html>
-

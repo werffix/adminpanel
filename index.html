@@ -1,311 +1,326 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель администратора CDCULT</title>
     <style>
-      body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #121212;
-        color: #e0e0e0;
-        margin: 0;
-        padding: 20px;
-      }
-      h1 {
-        color: #4a90e2;
-        text-align: center;
-      }
-      h2 {
-        color: #4a90e2;
-        border-bottom: 1px solid #444;
-        padding-bottom: 5px;
-      }
-      .loading {
-        text-align: center;
-        font-size: 18px;
-        margin: 20px 0;
-      }
-      .error {
-        color: #f44336;
-        background-color: #ffebee;
-        padding: 10px;
-        border-radius: 4px;
-        margin: 10px 0;
-      }
-      .release-card {
-        background-color: #1e1e1e;
-        border: 1px solid #333;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      }
-      .release-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 10px;
-      }
-      .release-title {
-          font-weight: bold;
-          font-size: 1.1em;
-      }
-      .status-badge {
-          padding: 4px 8px;
-          border-radius: 12px;
-          font-size: 0.9em;
-          font-weight: bold;
-      }
-      .status-sent { background-color: #4caf50; color: white; }
-      .status-rejected { background-color: #f44336; color: white; }
-      .status-new { background-color: #ff9800; color: black; }
-      .release-details {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Адаптивная сетка */
-        gap: 10px;
-        margin-top: 10px;
-      }
-      .detail-item {
-        margin-bottom: 5px;
-      }
-      .detail-label {
-        font-weight: bold;
-        color: #bbb;
-        font-size: 0.9em;
-      }
-      .detail-value {
-        word-break: break-word; /* Для длинных строк */
-      }
-      .actions {
-        margin-top: 15px;
-        display: flex;
-        gap: 10px;
-      }
-      .action-btn {
-        padding: 8px 16px;
-        border: none;
-        border-radius: 4px;
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-      .accept-btn { background-color: #4CAF50; }
-      .accept-btn:hover { background-color: #45a049; }
-      .reject-btn { background-color: #f44336; }
-      .reject-btn:hover { background-color: #da190b; }
-      .section {
-        margin-bottom: 40px;
-      }
-      .empty-section {
-        color: #999;
-        font-style: italic;
-        text-align: center;
-        padding: 20px;
-      }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #4a90e2;
+            text-align: center;
+        }
+        h2 {
+            color: #4a90e2;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .error {
+            color: #f44336;
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .release-card {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .release-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .release-title {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .status-sent { background-color: #4caf50; color: white; }
+        .status-rejected { background-color: #f44336; color: white; }
+        .status-new { background-color: #ff9800; color: black; }
+        .release-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .detail-item {
+            margin-bottom: 5px;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #bbb;
+            font-size: 0.9em;
+        }
+        .detail-value {
+            word-break: break-word;
+        }
+        .actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .accept-btn { background-color: #4CAF50; }
+        .accept-btn:hover { background-color: #45a049; }
+        .reject-btn { background-color: #f44336; }
+        .reject-btn:hover { background-color: #da190b; }
+        .section {
+            margin-bottom: 40px;
+        }
+        .empty-section {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+        /* Стили для спиннера загрузки */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #4a90e2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <h1>Панель администратора CDCULT</h1>
-    <div id="loading" class="loading">Загрузка данных...</div>
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Загрузка данных...</p>
+    </div>
     <div id="error-container" class="error" style="display: none;"></div>
     <div id="releases-container" style="display: none;">
 
-      <!-- Секция Новые -->
-      <div class="section">
-        <h2>Новые релизы</h2>
-        <div id="new-releases-list">
-          <div class="empty-section" id="new-empty">Нет новых релизов.</div>
+        <div class="section">
+            <h2>Новые релизы (<span id="new-count">0</span>)</h2>
+            <div id="new-releases-list">
+                <div class="empty-section" id="new-empty">Нет новых релизов.</div>
+            </div>
         </div>
-      </div>
 
-      <!-- Секция Отправленные -->
-      <div class="section">
-        <h2>Отправленные</h2>
-        <div id="sent-releases-list">
-          <div class="empty-section" id="sent-empty">Нет отправленных релизов.</div>
+        <div class="section">
+            <h2>Отправленные (<span id="sent-count">0</span>)</h2>
+            <div id="sent-releases-list">
+                <div class="empty-section" id="sent-empty">Нет отправленных релизов.</div>
+            </div>
         </div>
-      </div>
 
-      <!-- Секция Отклонённые -->
-      <div class="section">
-        <h2>Отклонённые</h2>
-        <div id="rejected-releases-list">
-          <div class="empty-section" id="rejected-empty">Нет отклонённых релизов.</div>
+        <div class="section">
+            <h2>Отклонённые (<span id="rejected-count">0</span>)</h2>
+            <div id="rejected-releases-list">
+                <div class="empty-section" id="rejected-empty">Нет отклонённых релизов.</div>
+            </div>
         </div>
-      </div>
 
     </div>
 
     <script>
-      let releasesData = {};
+        // --- ВАЖНО: ЗАМЕНИТЕ ЭТОТ URL НА ВАШ РЕАЛЬНЫЙ URL РАЗВЁРНУТОГО GAS ВЕБ-ПРИЛОЖЕНИЯ ---
+        const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwNeQd2jsgu7jc9_ak5DOde1JfyaMG1C8xLNSZSZN6EbWQ4G7trSmDXWqutSzDvp258/exec';
+        // --------------------------------------------------------------------------------------------
 
-      /**
-       * Загружает данные с GAS и отображает их
-       */
-      function loadData() {
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('releases-container').style.display = 'none';
-        document.getElementById('error-container').style.display = 'none';
+        let releasesData = {};
 
-        google.script.run
-          .withSuccessHandler(displayReleases)
-          .withFailureHandler(showError)
-          .getReleases();
-      }
+        async function loadData() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('releases-container').style.display = 'none';
+                document.getElementById('error-container').style.display = 'none';
 
-      /**
-       * Отображает полученные данные
-       * @param {Object} data - Объект с полями new, sent, rejected
-       */
-      function displayReleases(data) {
-        if (data.error) {
-          showError({ message: data.error });
-          return;
+                const response = await fetch(`${API_BASE_URL}?action=getReleases`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                releasesData = data;
+                displayReleases(data);
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                showError(error.message);
+            }
         }
 
-        releasesData = data;
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('releases-container').style.display = 'block';
+        function displayReleases(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('releases-container').style.display = 'block';
 
-        // Очищаем списки
-        ['new', 'sent', 'rejected'].forEach(category => {
-          const listEl = document.getElementById(`${category}-releases-list`);
-          listEl.innerHTML = '';
-          document.getElementById(`${category}-empty`).style.display = 'block';
-        });
+            // Обновляем счётчики
+            document.getElementById('new-count').textContent = data.new.length;
+            document.getElementById('sent-count').textContent = data.sent.length;
+            document.getElementById('rejected-count').textContent = data.rejected.length;
 
-        // Отображаем релизы в соответствующих списках
-        Object.keys(data).forEach(category => {
-          if (category === 'error') return; // Пропускаем поле ошибки
-          const releases = data[category];
-          const listEl = document.getElementById(`${category}-releases-list`);
+            ['new', 'sent', 'rejected'].forEach(category => {
+                const listEl = document.getElementById(`${category}-releases-list`);
+                listEl.innerHTML = ''; // Очищаем
+                document.getElementById(`${category}-empty`).style.display = data[category].length > 0 ? 'none' : 'block';
 
-          if (releases.length > 0) {
-            document.getElementById(`${category}-empty`).style.display = 'none';
-            releases.forEach(rel => {
-              const card = createReleaseCard(rel, category);
-              listEl.appendChild(card);
+                data[category].forEach(rel => {
+                    const card = createReleaseCard(rel, category);
+                    listEl.appendChild(card);
+                });
             });
-          }
-        });
-      }
-
-      /**
-       * Создаёт HTML-элемент для карточки релиза
-       * @param {Object} release - Данные релиза
-       * @param {string} category - Категория ('new', 'sent', 'rejected')
-       * @returns {HTMLElement} - Элемент div с карточкой
-       */
-      function createReleaseCard(release, category) {
-        const card = document.createElement('div');
-        card.className = 'release-card';
-
-        const header = document.createElement('div');
-        header.className = 'release-header';
-
-        // Заголовок релиза (например, "Артист - Название")
-        const title = document.createElement('div');
-        title.className = 'release-title';
-        // Попробуем сформировать заголовок из наиболее вероятных полей
-        const artist = release['Основные артист(-ы)'] || release['Main Artist(s)'] || 'N/A';
-        const titleName = release['Название релиза'] || release['Release Title'] || 'N/A';
-        title.textContent = `${artist} - ${titleName}`;
-        header.appendChild(title);
-
-        // Бейдж статуса
-        const statusBadge = document.createElement('div');
-        statusBadge.className = 'status-badge';
-        if (category === 'sent') {
-            statusBadge.classList.add('status-sent');
-            statusBadge.textContent = 'Отправлен';
-        } else if (category === 'rejected') {
-            statusBadge.classList.add('status-rejected');
-            statusBadge.textContent = 'Отклонён';
-        } else { // new
-            statusBadge.classList.add('status-new');
-            statusBadge.textContent = 'Новый';
-        }
-        header.appendChild(statusBadge);
-
-        card.appendChild(header);
-
-        // Детали релиза (все поля, кроме служебного __rowIndex__)
-        const details = document.createElement('div');
-        details.className = 'release-details';
-        Object.keys(release).forEach(key => {
-          if (key === '__rowIndex__') return; // Пропускаем служебное поле
-          const detailItem = document.createElement('div');
-          detailItem.className = 'detail-item';
-          const label = document.createElement('div');
-          label.className = 'detail-label';
-          label.textContent = key;
-          const value = document.createElement('div');
-          value.className = 'detail-value';
-          value.textContent = release[key];
-          detailItem.appendChild(label);
-          detailItem.appendChild(value);
-          details.appendChild(detailItem);
-        });
-        card.appendChild(details);
-
-        // Кнопки действий (только для "new")
-        if (category === 'new') {
-          const actions = document.createElement('div');
-          actions.className = 'actions';
-
-          const acceptBtn = document.createElement('button');
-          acceptBtn.textContent = 'Принять (green)';
-          acceptBtn.className = 'action-btn accept-btn';
-          acceptBtn.onclick = () => changeStatus(release.__rowIndex__, 'green');
-
-          const rejectBtn = document.createElement('button');
-          rejectBtn.textContent = 'Отклонить (red)';
-          rejectBtn.className = 'action-btn reject-btn';
-          rejectBtn.onclick = () => changeStatus(release.__rowIndex__, 'red');
-
-          actions.appendChild(acceptBtn);
-          actions.appendChild(rejectBtn);
-          card.appendChild(actions);
         }
 
-        return card;
-      }
+        function createReleaseCard(release, category) {
+            const card = document.createElement('div');
+            card.className = 'release-card';
 
-      /**
-       * Изменяет статус релиза через GAS
-       * @param {number} rowIndex - Номер строки в таблице
-       * @param {string} newStatus - Новый статус
-       */
-      function changeStatus(rowIndex, newStatus) {
-        if (!confirm(`Вы уверены, что хотите изменить статус строки ${rowIndex} на "${newStatus}"?`)) {
-          return;
+            const header = document.createElement('div');
+            header.className = 'release-header';
+
+            const title = document.createElement('div');
+            title.className = 'release-title';
+            const artist = release['Основные артист(-ы)'] || release['Main Artist(s)'] || 'N/A';
+            const titleName = release['Название релиза'] || release['Release Title'] || 'N/A';
+            title.textContent = `${artist} - ${titleName}`;
+            header.appendChild(title);
+
+            const statusBadge = document.createElement('div');
+            statusBadge.className = 'status-badge';
+            if (category === 'sent') {
+                statusBadge.classList.add('status-sent');
+                statusBadge.textContent = 'Отправлен';
+            } else if (category === 'rejected') {
+                statusBadge.classList.add('status-rejected');
+                statusBadge.textContent = 'Отклонён';
+            } else {
+                statusBadge.classList.add('status-new');
+                statusBadge.textContent = 'Новый';
+            }
+            header.appendChild(statusBadge);
+
+            card.appendChild(header);
+
+            const details = document.createElement('div');
+            details.className = 'release-details';
+            Object.keys(release).forEach(key => {
+                if (key === '__rowIndex__') return;
+                const detailItem = document.createElement('div');
+                detailItem.className = 'detail-item';
+                const label = document.createElement('div');
+                label.className = 'detail-label';
+                label.textContent = key;
+                const value = document.createElement('div');
+                value.className = 'detail-value';
+                value.textContent = release[key];
+                detailItem.appendChild(label);
+                detailItem.appendChild(value);
+                details.appendChild(detailItem);
+            });
+            card.appendChild(details);
+
+            if (category === 'new') {
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+
+                const acceptBtn = document.createElement('button');
+                acceptBtn.textContent = 'Принять (green)';
+                acceptBtn.className = 'action-btn accept-btn';
+                acceptBtn.onclick = () => changeStatus(release.__rowIndex__, 'green');
+
+                const rejectBtn = document.createElement('button');
+                rejectBtn.textContent = 'Отклонить (red)';
+                rejectBtn.className = 'action-btn reject-btn';
+                rejectBtn.onclick = () => changeStatus(release.__rowIndex__, 'red');
+
+                actions.appendChild(acceptBtn);
+                actions.appendChild(rejectBtn);
+                card.appendChild(actions);
+            }
+
+            return card;
         }
-        google.script.run
-          .withSuccessHandler(() => {
-              // После успешного обновления перезагружаем данные
-              loadData();
-              // alert(`Статус строки ${rowIndex} изменён на "${newStatus}".`);
-          })
-          .withFailureHandler(showError)
-          .updateStatus(rowIndex, newStatus);
-      }
 
-      /**
-       * Отображает ошибку
-       * @param {Object} error - Объект ошибки
-       */
-      function showError(error) {
-        console.error('Ошибка GAS:', error);
-        const errorDiv = document.getElementById('error-container');
-        errorDiv.textContent = `Произошла ошибка: ${error.message || 'Неизвестная ошибка'}`;
-        errorDiv.style.display = 'block';
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('releases-container').style.display = 'none';
-      }
+        async function changeStatus(rowIndex, newStatus) {
+            if (!confirm(`Вы уверены, что хотите изменить статус строки ${rowIndex} на "${newStatus}"?`)) {
+                return;
+            }
 
-      // Загружаем данные при загрузке страницы
-      window.onload = loadData;
+            try {
+                const response = await fetch(API_BASE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'updateStatus',
+                        rowIndex: rowIndex,
+                        newStatus: newStatus
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Успешно обновлено, перезагружаем данные
+                    loadData();
+                    // alert(result.message); // Опционально
+                } else {
+                    throw new Error(result.error || 'Неизвестная ошибка при обновлении статуса');
+                }
+            } catch (error) {
+                console.error('Ошибка обновления статуса:', error);
+                alert(`Ошибка: ${error.message}`);
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-container');
+            errorDiv.textContent = `Произошла ошибка: ${message}`;
+            errorDiv.style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('releases-container').style.display = 'none';
+        }
+
+        window.onload = loadData;
     </script>
-  </body>
+</body>
 </html>

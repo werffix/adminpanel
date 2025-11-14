@@ -105,11 +105,7 @@
             box-shadow: 0 0 0 0.2rem rgba(109, 123, 255, 0.25);
         }
 
-        /* ✅ Подсветка статуса */
-        .status-input.green { border-color: #28a745 !important; box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important; }
-        .status-input.red { border-color: #dc3545 !important; box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important; }
-
-        /* ✅ Подписи полей — БЕЛЫЙ */
+        /* ✅ Подписи — БЕЛЫЙ */
         .form-label {
             color: white !important;
             font-weight: 500;
@@ -121,9 +117,8 @@
             opacity: 1 !important;
         }
 
-        .moderation-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        .moderation-btns {
+            display: flex;
             gap: 0.5rem;
             margin-top: 1rem;
         }
@@ -187,6 +182,9 @@
         #noPending {
             color: white;
         }
+
+        /* Скрытое поле комментария */
+        #commentGroup { display: none; }
     </style>
 </head>
 <body>
@@ -240,7 +238,37 @@
     </div>
 </div>
 
-<!-- Модалка "Подробнее" -->
+<!-- 🔁 Модальное окно модерации -->
+<div class="modal fade" id="moderateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="moderateModalLabel">📝 Модерация релиза</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalReleaseTitle">
+                <div class="mb-3">
+                    <label class="form-label">Статус (green / red)</label>
+                    <input type="text" class="form-control form-control-dark" id="modalStatus" 
+                           placeholder="green / red" autocomplete="off">
+                    <div id="statusError" class="text-danger mt-1" style="display:none;">Введите "green" или "red"</div>
+                </div>
+                <div id="commentGroup" class="mb-3">
+                    <label class="form-label">Комментарий</label>
+                    <input type="text" class="form-control form-control-dark" id="modalComment" 
+                           placeholder="Причина отклонения...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" id="saveModerationBtn">💾 Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🔍 Модальное окно "Подробнее" -->
 <div class="modal fade" id="detailModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -273,8 +301,19 @@ const el = {
     lastUpdate: document.getElementById('lastUpdate'),
     refreshBtn: document.getElementById('refreshBtn'),
     detailModal: document.getElementById('detailModal'),
-    modalContent: document.getElementById('modalContent')
+    modalContent: document.getElementById('modalContent'),
+    
+    // Модалка модерации
+    moderateModal: document.getElementById('moderateModal'),
+    modalReleaseTitle: document.getElementById('modalReleaseTitle'),
+    modalStatus: document.getElementById('modalStatus'),
+    modalComment: document.getElementById('modalComment'),
+    commentGroup: document.getElementById('commentGroup'),
+    statusError: document.getElementById('statusError'),
+    saveModerationBtn: document.getElementById('saveModerationBtn')
 };
+
+let currentReleaseTitle = '';
 
 function formatDate(dateStr) {
     if (!dateStr) return '—';
@@ -328,32 +367,16 @@ function createCard(data) {
     const safeTitle = escapeHtml(releaseTitle);
     const archiveUrl = data['Ссылка на архив'] || '';
 
-    const statusInput = `
-        <div class="moderation-controls">
-            <div>
-                <label class="form-label">Статус (green / red)</label>
-                <input type="text" class="form-control form-control-sm form-control-dark status-input" 
-                       placeholder="green / red" 
-                       value="${escapeHtml(data['Статус'] || '')}"
-                       data-title="${encodeURIComponent(releaseTitle)}">
-            </div>
-            <div>
-                <label class="form-label">Комментарий</label>
-                <input type="text" class="form-control form-control-sm form-control-dark comment-input" 
-                       placeholder="Причина отклонения..."
-                       value="${escapeHtml(data['Комментарий'] || '')}"
-                       data-title="${encodeURIComponent(releaseTitle)}">
-            </div>
+    const buttons = `
+        <div class="moderation-btns">
+            <button class="btn btn-success btn-moderate approve-btn" data-title="${encodeURIComponent(releaseTitle)}">
+                ✅ Одобрить
+            </button>
+            <button class="btn btn-danger btn-moderate reject-btn" data-title="${encodeURIComponent(releaseTitle)}">
+                ❌ Отклонить
+            </button>
         </div>
-        <button class="btn btn-outline-success btn-sm mt-2 w-100 save-status-btn" 
-                type="button"
-                data-title="${encodeURIComponent(releaseTitle)}">
-            💾 Сохранить статус и комментарий
-        </button>
-    `;
-
-    const actionBtns = `
-        <div class="d-flex gap-2 mt-3">
+        <div class="d-flex gap-2 mt-2">
             <button class="btn btn-sm btn-detail detail-btn" data-title="${encodeURIComponent(releaseTitle)}">
                 📋 Подробнее
             </button>
@@ -379,8 +402,7 @@ function createCard(data) {
                     <p class="mb-1"><span class="field-label">Тип:</span> ${escapeHtml(data['Тип релиза'] || '—')}</p>
                     <p class="mb-1"><span class="field-label">Дата выхода:</span> <strong>${formatDate(data['Дата выхода'])}</strong></p>
                     <p class="mb-1"><span class="field-label">Жанр:</span> ${escapeHtml(data['Жанр релиза'] || '—')}</p>
-                    ${statusInput}
-                    ${actionBtns}
+                    ${buttons}
                 </div>
             </div>
         </div>
@@ -456,78 +478,90 @@ function renderModalContent(data) {
     `;
 }
 
-document.addEventListener('input', function(e) {
-    if (e.target.classList.contains('status-input')) {
-        const input = e.target;
-        const value = input.value.trim().toLowerCase();
-        input.classList.remove('green', 'red');
-        if (value === 'green') input.classList.add('green');
-        else if (value === 'red') input.classList.add('red');
+// ✅ Появление поля комментария при red
+el.modalStatus.addEventListener('input', function() {
+    const value = this.value.trim().toLowerCase();
+    if (value === 'red') {
+        el.commentGroup.style.display = 'block';
+        el.modalComment.focus();
+    } else {
+        el.commentGroup.style.display = 'none';
+    }
+    el.statusError.style.display = 'none';
+});
+
+// ✅ Открытие модалки
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('approve-btn') || e.target.classList.contains('reject-btn')) {
+        const encodedTitle = e.target.closest('.btn').dataset.title;
+        currentReleaseTitle = decodeURIComponent(encodedTitle);
+        el.modalReleaseTitle.value = currentReleaseTitle;
+        el.modalStatus.value = e.target.classList.contains('approve-btn') ? 'green' : '';
+        el.modalComment.value = '';
+        el.commentGroup.style.display = e.target.classList.contains('reject-btn') ? 'block' : 'none';
+        bootstrap.Modal.getOrCreateInstance(el.moderateModal).show();
     }
 });
 
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('save-status-btn')) {
-        const btn = e.target;
-        const encodedTitle = btn.dataset.title;
-        const card = btn.closest('.col');
-        const statusInput = card.querySelector('.status-input');
-        const commentInput = card.querySelector('.comment-input');
-        
-        const status = statusInput.value.trim();
-        const comment = commentInput.value.trim();
+// ✅ Сохранение
+el.saveModerationBtn.addEventListener('click', function() {
+    const status = el.modalStatus.value.trim().toLowerCase();
+    const comment = el.modalComment.value.trim();
 
-        if (!encodedTitle) {
-            alert('❌ Название релиза не найдено');
-            return;
-        }
-
-        if (!status) {
-            alert('⚠️ Введите статус (green / red)');
-            statusInput.focus();
-            return;
-        }
-
-        if (status !== 'green' && status !== 'red') {
-            alert('⚠️ Статус должен быть "green" или "red"');
-            statusInput.focus();
-            return;
-        }
-
-        const url = new URL(WEB_APP_URL);
-        url.searchParams.append('action', 'setStatus');
-        url.searchParams.append('title', decodeURIComponent(encodedTitle));
-        url.searchParams.append('status', status);
-        if (comment) url.searchParams.append('comment', comment);
-
-        btn.disabled = true;
-        btn.innerHTML = '⏳ Сохранение...';
-
-        fetch(url)
-            .then(res => res.json())
-            .then(result => {
-                if (result.success) {
-                    const badge = card.querySelector('.status-badge');
-                    badge.outerHTML = getStatusBadge(status);
-                    
-                    btn.innerHTML = '✅ Сохранено';
-                    btn.classList.add('btn-success');
-                    setTimeout(() => {
-                        btn.innerHTML = '💾 Сохранить статус и комментарий';
-                        btn.disabled = false;
-                        btn.classList.remove('btn-success');
-                    }, 2000);
-                } else {
-                    throw new Error(result.error || 'Ошибка сохранения');
-                }
-            })
-            .catch(err => {
-                console.error('❌ Ошибка:', err);
-                btn.disabled = false;
-                btn.innerHTML = '💾 Сохранить статус и комментарий';
-                alert(`❌ ${err.message}`);
-            });
+    if (!status) {
+        el.statusError.style.display = 'block';
+        el.modalStatus.focus();
+        return;
     }
+
+    if (status !== 'green' && status !== 'red') {
+        el.statusError.style.display = 'block';
+        el.modalStatus.focus();
+        return;
+    }
+
+    if (status === 'red' && !comment) {
+        alert('⚠️ При отклонении обязателен комментарий');
+        el.modalComment.focus();
+        return;
+    }
+
+    // Формируем GET-запрос
+    const url = new URL(WEB_APP_URL);
+    url.searchParams.append('action', 'setStatus');
+    url.searchParams.append('title', currentReleaseTitle);
+    url.searchParams.append('status', status);
+    if (comment) url.searchParams.append('comment', comment);
+
+    el.saveModerationBtn.disabled = true;
+    el.saveModerationBtn.innerHTML = '⏳';
+
+    fetch(url)
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                // Обновляем карточку
+                const col = document.querySelector(`.col[data-title="${encodeURIComponent(currentReleaseTitle)}"]`);
+                if (col) {
+                    const badge = col.querySelector('.status-badge');
+                    badge.outerHTML = getStatusBadge(status);
+                    // Скрываем кнопки модерации
+                    const btns = col.querySelector('.moderation-btns');
+                    if (btns) btns.remove();
+                }
+                bootstrap.Modal.getInstance(el.moderateModal).hide();
+                el.saveModerationBtn.disabled = false;
+                el.saveModerationBtn.innerHTML = '💾 Сохранить';
+            } else {
+                throw new Error(result.error);
+            }
+        })
+        .catch(err => {
+            console.error('❌ Ошибка:', err);
+            alert(`❌ ${err.message}`);
+            el.saveModerationBtn.disabled = false;
+            el.saveModerationBtn.innerHTML = '💾 Сохранить';
+        });
 });
 
 function updateCounts() {
@@ -612,5 +646,3 @@ loadReleases();
 
 </body>
 </html>
-
-
